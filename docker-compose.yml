@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # Database Services
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: leadgen
+      POSTGRES_PASSWORD: leadgenpass
+      POSTGRES_DB: leadgen
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leadgen"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Services
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://leadgen:leadgenpass@postgres:5432/leadgen
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-dummy-key}
+    depends_on:
+      - postgres
+      - redis
+    command: uvicorn main:app --host 0.0.0.0 --reload
+
+  celery-worker:
+    build: ./backend
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://leadgen:leadgenpass@postgres:5432/leadgen
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-dummy-key}
+    depends_on:
+      - backend
+      - redis
+    command: celery -A worker.celery_app worker --loglevel=info
+
+  # Scraper Microservice
+  scraper:
+    build: ./scraper
+    volumes:
+      - ./scraper:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - BACKEND_URL=http://backend:8000
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+    depends_on:
+      - redis
+      - backend
+
+  # Frontend Service
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    command: npm run dev
+
+volumes:
+  postgres-data:
+  redis-data:
