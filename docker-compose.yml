@@ -42,9 +42,17 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - OPENAI_API_KEY=${OPENAI_API_KEY:-dummy-key}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: uvicorn main:app --host 0.0.0.0 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   celery-worker:
     build: ./backend
@@ -55,8 +63,10 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - OPENAI_API_KEY=${OPENAI_API_KEY:-dummy-key}
     depends_on:
-      - backend
-      - redis
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: celery -A worker.celery_app worker --loglevel=info
 
   # Scraper Microservice
@@ -64,27 +74,44 @@ services:
     build: ./scraper
     volumes:
       - ./scraper:/app
+    ports:
+      - "8080:8080"
     environment:
       - REDIS_URL=redis://redis:6379/0
       - BACKEND_URL=http://backend:8000
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
     depends_on:
-      - redis
-      - backend
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"] 
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   # Frontend Service
   frontend:
     build: ./frontend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_TELEMETRY_DISABLED=1
+      - NODE_ENV=production
+      - NODE_OPTIONS=--max-old-space-size=4096
     depends_on:
-      - backend
-    command: npm run dev
+      backend:
+        condition: service_healthy
+    # No command needed - using CMD from Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
 volumes:
   postgres-data:
