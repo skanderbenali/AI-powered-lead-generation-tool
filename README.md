@@ -64,7 +64,7 @@ This project is structured as a monorepo with several interconnected components:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/AI-powered-lead-generation-tool.git
+   git clone https://github.com/skanderbenali/AI-powered-lead-generation-tool.git
    cd AI-powered-lead-generation-tool
    ```
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 
 type SearchFormProps = {
   onSearch: (criteria: any) => void;
@@ -13,7 +13,7 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     keywords: '',
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setCriteria((prev) => ({
       ...prev,
@@ -21,7 +21,7 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSearch(criteria);
   };

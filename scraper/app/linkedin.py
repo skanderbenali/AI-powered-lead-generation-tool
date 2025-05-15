@@ -6,8 +6,8 @@ from urllib.parse import urljoin
 import logging
 import json
 
-# For demo purposes, using pyppeteer, in production might use Playwright
-from pyppeteer import launch
+# Using Playwright for browser automation
+from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from user_agent import generate_user_agent
 
@@ -34,32 +34,30 @@ async def scrape_linkedin_profiles(
     """
     logger.info(f"Starting LinkedIn scrape for URL: {search_url}")
     
-    # Launch browser
-    browser = await launch(
+    # Launch browser with Playwright
+    playwright = await async_playwright().start()
+    browser_type = playwright.chromium
+    browser = await browser_type.launch(
         headless=headless,
-        args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     )
     
     try:
-        page = await browser.newPage()
+        context = await browser.new_context(user_agent=generate_user_agent())
+        page = await context.new_page()
         
-        # Set random user agent
-        user_agent = generate_user_agent()
-        await page.setUserAgent(user_agent)
-        
-        # Set viewport size
-        await page.setViewport({'width': 1280, 'height': 800})
+        # Viewport size is set in context by default in Playwright
         
         # Navigate to search URL
         await page.goto(search_url)
         
         # Handle LinkedIn login if needed (would require credentials in production)
-        if await page.querySelector('input#username') is not None:
+        if await page.query_selector('input#username') is not None:
             logger.warning("LinkedIn login required but not implemented in demo")
             return []
             
         # Wait for search results to load
-        await page.waitForSelector('.search-result__info', {'timeout': 10000})
+        await page.wait_for_selector('.search-result__info', timeout=10000)
         
         profiles = []
         page_num = 1
@@ -87,11 +85,11 @@ async def scrape_linkedin_profiles(
                     profiles.append(profile_data)
                     
             # Check if there's a next page
-            next_button = await page.querySelector('.artdeco-pagination__button--next:not(.artdeco-pagination__button--disabled)')
+            next_button = await page.query_selector('.artdeco-pagination__button--next:not(.artdeco-pagination__button--disabled)')
             if next_button:
                 logger.info(f"Navigating to page {page_num + 1}")
                 await next_button.click()
-                await page.waitForNavigation()
+                await page.wait_for_load_state('networkidle')
                 page_num += 1
                 
                 # Add random delay to avoid detection
@@ -109,6 +107,7 @@ async def scrape_linkedin_profiles(
         
     finally:
         await browser.close()
+        await playwright.stop()
 
 
 def extract_profile_from_card(card) -> Optional[Dict[str, Any]]:
