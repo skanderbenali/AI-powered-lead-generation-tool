@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from datetime import timedelta
+import requests
+import json
+from authlib.integrations.starlette_client import OAuth, OAuthError
+from starlette.config import Config
 
 from app.database import get_db
-from app.schemas import User, UserCreate, Token
+from app.schemas import User, UserCreate, Token, AuthProvider, OAuthUserInfo
 from app.services.auth import (
     authenticate_user,
     create_access_token,
@@ -12,8 +17,33 @@ from app.services.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
 from app.services.user import create_user, get_user_by_email, get_user_by_username
+from app.services.oauth import authenticate_oauth_user, get_google_user_info, get_github_user_info
+from app.core.oauth import google_config, github_config, oauth_config
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+# Initialize OAuth for Google and GitHub
+config = Config()
+oauth = OAuth(config)
+
+# Configure OAuth providers
+oauth.register(
+    name='google',
+    client_id=google_config["client_id"],
+    client_secret=google_config["client_secret"],
+    authorize_url=google_config["authorize_url"],
+    access_token_url=google_config["token_url"],
+    client_kwargs={'scope': google_config["scope"]}
+)
+
+oauth.register(
+    name='github',
+    client_id=github_config["client_id"],
+    client_secret=github_config["client_secret"],
+    authorize_url=github_config["authorize_url"],
+    access_token_url=github_config["token_url"],
+    client_kwargs={'scope': github_config["scope"]}
+)
 
 
 @router.post("/register", response_model=User)
@@ -62,3 +92,59 @@ async def login_for_access_token(
     )
     
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/google")
+async def login_google():
+    """Redirect to Google OAuth authorization URL"""
+    redirect_uri = google_config["redirect_uri"]
+    return await oauth.google.authorize_redirect(redirect_uri)
+
+
+@router.get("/google/callback")
+async def google_callback(request: Request, db: Session = Depends(get_db)):
+    """Handle Google OAuth callback"""
+    try:
+        token = await oauth.google.authorize_access_token(request)
+        user_info = await get_google_user_info(token["access_token"])
+        access_token, is_new_user = await authenticate_oauth_user(db, user_info)
+        
+        # Redirect to frontend with token
+        redirect_url = f"{oauth_config.FRONTEND_REDIRECT_URL}?token={access_token['access_token']}&provider=google"
+        if is_new_user:
+            redirect_url += "&new_user=true"
+        
+        return RedirectResponse(url=redirect_url)
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": f"Authentication failed: {str(e)}"},
+        )
+
+
+@router.get("/github")
+async def login_github():
+    """Redirect to GitHub OAuth authorization URL"""
+    redirect_uri = github_config["redirect_uri"]
+    return await oauth.github.authorize_redirect(redirect_uri)
+
+
+@router.get("/github/callback")
+async def github_callback(request: Request, db: Session = Depends(get_db)):
+    """Handle GitHub OAuth callback"""
+    try:
+        token = await oauth.github.authorize_access_token(request)
+        user_info = await get_github_user_info(token["access_token"])
+        access_token, is_new_user = await authenticate_oauth_user(db, user_info)
+        
+        # Redirect to frontend with token
+        redirect_url = f"{oauth_config.FRONTEND_REDIRECT_URL}?token={access_token['access_token']}&provider=github"
+        if is_new_user:
+            redirect_url += "&new_user=true"
+        
+        return RedirectResponse(url=redirect_url)
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": f"Authentication failed: {str(e)}"},
+        )
