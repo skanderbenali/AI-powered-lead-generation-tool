@@ -71,7 +71,8 @@ const Dashboard = () => {
     <ProtectedRoute>
       <Layout>
         <Head>
-          <title>Lead Generation Dashboard</title>
+          <title>Dashboard | LeadGen AI</title>
+          <link rel="icon" href="/logo-icon.svg" />
         </Head>
       
       <div className="py-4 sm:py-6">

@@ -2,6 +2,8 @@
 
 <div align="center">
 
+<img src="https://raw.githubusercontent.com/skanderbenali/AI-powered-lead-generation-tool/master/frontend/public/logo.svg" alt="LeadGen AI Logo" width="220" height="60" />
+
 # AI-Powered Lead Generation Tool
 
 <p style="font-size: 18px; padding: 10px; margin: 20px 0; background-color: #5271FF; color: white; border-radius: 8px; width: 85%; max-width: 800px;">
@@ -279,7 +281,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📞 Support
 
-If you have any questions or need help, please open an issue on GitHub or contact the team at support@example.com.
+If you have any questions or need help, please open an issue on GitHub or contact me at dev.skander.benali@gmail.com.
 
 ## 🔐 OAuth Configuration
 

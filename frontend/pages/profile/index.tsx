@@ -112,6 +112,7 @@ const ProfilePage = () => {
       <Layout>
         <Head>
           <title>My Profile | LeadGen AI</title>
+          <link rel="icon" href="/logo-icon.svg" />
         </Head>
         <div className="px-4 py-5 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">

@@ -47,9 +47,9 @@ const Home: NextPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <Head>
-        <title>LeadAI - AI-Powered Lead Generation</title>
+        <title>LeadGen AI - AI-Powered Lead Generation</title>
         <meta name="description" content="Generate, score, and engage with high-quality leads using AI" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/logo-icon.svg" />
       </Head>
 
       {/* Navigation */}

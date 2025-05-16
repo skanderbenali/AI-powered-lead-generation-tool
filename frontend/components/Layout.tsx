@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   HomeIcon, 
   UserGroupIcon, 
@@ -45,7 +46,13 @@ const Layout = ({ children }: LayoutProps) => {
               </button>
             </div>
             <div className="flex-shrink-0 flex items-center px-4">
-              <span className="text-xl font-bold text-white">LeadGen AI</span>
+              <Image
+                src="/logo.svg"
+                alt="LeadGen AI"
+                width={140}
+                height={32}
+                priority
+              />
             </div>
             <div className="mt-5 flex-1 h-0 overflow-y-auto">
               <nav className="px-2 space-y-1">
@@ -70,7 +77,13 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
         <div className="flex-1 flex flex-col min-h-0 bg-primary-800">
           <div className="flex items-center h-16 flex-shrink-0 px-4 bg-primary-900">
-            <span className="text-xl font-bold text-white">LeadGen AI</span>
+            <Image
+              src="/logo.svg"
+              alt="LeadGen AI"
+              width={140}
+              height={32}
+              priority
+            />
           </div>
           <div className="flex-1 flex flex-col overflow-y-auto">
             <nav className="flex-1 px-2 py-4 space-y-1">
@@ -102,7 +115,15 @@ const Layout = ({ children }: LayoutProps) => {
           </button>
           <div className="flex-1 px-4 flex justify-between">
             <div className="flex-1 flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">LeadGen AI</h1>
+              <div className="h-8 w-32">
+                <Image
+                  src="/logo.svg"
+                  alt="LeadGen AI"
+                  width={120}
+                  height={28}
+                  priority
+                />
+              </div>
             </div>
           </div>
         </div>
