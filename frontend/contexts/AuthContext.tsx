@@ -69,7 +69,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (username: string, password: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      // Add a fallback URL if environment variable is not available
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      console.log('Login using API URL:', apiUrl); // Debug log
+      
+      const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -107,6 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Login with OAuth provider (Google or GitHub)
   const loginWithOAuth = (provider: AuthProvider) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    console.log('OAuth login using API URL:', apiUrl); // Debug log
     window.location.href = `${apiUrl}/auth/${provider.toLowerCase()}`;
   };
 
@@ -137,7 +142,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Fetch user profile with token
   const fetchUserProfile = async (accessToken: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+      // Add a fallback URL if environment variable is not available
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      console.log('Fetching user profile using API URL:', apiUrl); // Debug log
+      
+      const response = await fetch(`${apiUrl}/users/me`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
