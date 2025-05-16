@@ -5,6 +5,8 @@ import Layout from '../../components/Layout';
 import LeadTable from '../../components/LeadTable';
 import SearchForm from '../../components/SearchForm';
 import Stats from '../../components/Stats';
+import ProtectedRoute from '../../components/ProtectedRoute';
+import { useAuth } from '../../contexts/AuthContext';
 import { 
   ChartBarIcon, 
   UserGroupIcon, 
@@ -12,7 +14,8 @@ import {
   SparklesIcon,
   MagnifyingGlassCircleIcon,
   ArrowPathIcon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 // Mock data for initial development
@@ -25,6 +28,9 @@ const MOCK_LEADS = [
 ];
 
 const Dashboard = () => {
+  // Get the logout function from AuthContext
+  const { logout, user } = useAuth();
+  
   const [searchCriteria, setSearchCriteria] = useState({
     industry: '',
     title: '',
@@ -62,10 +68,11 @@ const Dashboard = () => {
   };
 
   return (
-    <Layout>
-      <Head>
-        <title>Lead Generation Dashboard</title>
-      </Head>
+    <ProtectedRoute>
+      <Layout>
+        <Head>
+          <title>Lead Generation Dashboard</title>
+        </Head>
       
       <div className="py-4 sm:py-6">
         {/* Page header */}
@@ -75,6 +82,11 @@ const Dashboard = () => {
               <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">Dashboard</h1>
             </div>
             <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
+              {user && (
+                <div className="flex items-center mr-4 text-sm text-gray-700">
+                  <span className="font-medium mr-2">Welcome, {user.full_name || user.username}</span>
+                </div>
+              )}
               <button 
                 onClick={() => setShowSearchPanel(!showSearchPanel)}
                 className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
@@ -92,6 +104,13 @@ const Dashboard = () => {
                   aria-hidden="true" 
                 />
                 Refresh
+              </button>
+              <button 
+                onClick={logout}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                <ArrowRightOnRectangleIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                Logout
               </button>
             </div>
           </div>
@@ -176,7 +195,8 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </Layout>
+      </Layout>
+    </ProtectedRoute>
   );
 };
 

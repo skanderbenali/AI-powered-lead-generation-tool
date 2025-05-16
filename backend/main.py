@@ -13,7 +13,7 @@ from app.schemas import (
     EmailTemplate, EmailTemplateCreate,
     EmailCampaign, EmailCampaignCreate
 )
-from app.routers import leads, auth, projects, emails, ai, analytics
+from app.routers import leads, auth, projects, emails, ai, analytics, users
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -36,6 +36,7 @@ app.add_middleware(
 # Include routers
 app.include_router(leads.router)
 app.include_router(auth.router)
+app.include_router(users.router)  # Add users router
 app.include_router(projects.router)
 app.include_router(emails.router)
 app.include_router(ai.router)

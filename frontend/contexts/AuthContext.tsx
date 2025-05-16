@@ -146,7 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       console.log('Fetching user profile using API URL:', apiUrl); // Debug log
       
-      const response = await fetch(`${apiUrl}/users/me`, {
+      const response = await fetch(`${apiUrl}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
