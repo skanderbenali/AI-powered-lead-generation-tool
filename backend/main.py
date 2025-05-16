@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import os
+# Import SessionMiddleware for OAuth
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.database import get_db, engine
 from app.models import Base
@@ -22,6 +25,15 @@ app = FastAPI(
     title="Lead Generation API",
     description="API for AI-Powered Lead Generation Tool",
     version="0.1.0",
+)
+
+# Session middleware for OAuth - MUST come before other middleware
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SECRET_KEY", "CHANGE_THIS_TO_A_SECURE_SECRET_KEY"),
+    max_age=3600,  # session expiry in seconds
+    https_only=False,  # Set to True in production
+    same_site="lax"  # Provides CSRF protection while allowing redirects from same site
 )
 
 # CORS middleware

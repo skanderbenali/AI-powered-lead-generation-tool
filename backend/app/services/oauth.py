@@ -66,11 +66,45 @@ async def get_github_user_info(access_token: str) -> OAuthUserInfo:
     )
 
 
-async def authenticate_oauth_user(db: Session, user_info: OAuthUserInfo) -> Tuple[Dict[str, str], bool]:
+async def authenticate_oauth_user(db: Session, user_info: Dict[str, Any] | OAuthUserInfo) -> Tuple[Dict[str, str], bool]:
     """
     Authenticate or create a user based on OAuth data
     Returns a tuple of (token_data, is_new_user)
+    
+    Args:
+        db: Database session
+        user_info: User information, either as an OAuthUserInfo object or a dictionary
     """
+    # Convert dictionary to proper format if needed
+    if isinstance(user_info, dict):
+        print(f"Converting dictionary to OAuthUserInfo: {user_info}")
+        # Handle the dictionary format
+        email = user_info.get("email")
+        if not email:
+            raise ValueError("Email is required for OAuth authentication")
+            
+        # Get or create username from email
+        username = user_info.get("username", email.split("@")[0])
+        
+        # Determine provider
+        provider_str = user_info.get("auth_provider", "google").lower()
+        if provider_str == "google":
+            provider = AuthProvider.GOOGLE
+        elif provider_str == "github":
+            provider = AuthProvider.GITHUB
+        else:
+            provider = AuthProvider.LOCAL
+            
+        # Create proper OAuthUserInfo object
+        user_info = OAuthUserInfo(
+            provider=provider,
+            provider_user_id=user_info.get("sub", str(hash(email))),  # Use a hash of email if no ID
+            email=email,
+            username=username,
+            full_name=user_info.get("name"),
+            avatar_url=user_info.get("picture")
+        )
+        
     # Check if user already exists with this email
     existing_user = get_user_by_email(db, user_info.email)
     is_new_user = False
