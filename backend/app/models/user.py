@@ -24,6 +24,12 @@ class User(Base):
     provider_user_id = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     
+    # Profile fields
+    bio = Column(String, nullable=True)
+    company = Column(String, nullable=True)
+    job_title = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    
     # Relationships
     leads = relationship("Lead", back_populates="owner")
     projects = relationship("Project", back_populates="owner")

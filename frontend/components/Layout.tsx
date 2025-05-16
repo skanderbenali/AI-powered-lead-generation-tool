@@ -7,7 +7,8 @@ import {
   EnvelopeIcon, 
   Cog6ToothIcon,
   Bars3Icon,
-  XMarkIcon 
+  XMarkIcon,
+  UserIcon 
 } from '@heroicons/react/24/outline';
 
 type LayoutProps = {
@@ -19,6 +20,7 @@ const navigation = [
   { name: 'Leads', href: '/leads', icon: UserGroupIcon },
   { name: 'Campaigns', href: '/campaigns', icon: EnvelopeIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+  { name: 'Profile', href: '/profile', icon: UserIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
 

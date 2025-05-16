@@ -1,6 +1,17 @@
 # AI-Powered Lead Generation Tool
 
-![Project Banner](https://via.placeholder.com/1200x300/5271FF/FFFFFF?text=AI-Powered+Lead+Generation+Tool)
+<div align="center">
+
+# AI-Powered Lead Generation Tool
+
+<p style="font-size: 18px; padding: 10px; margin: 20px 0; background-color: #5271FF; color: white; border-radius: 8px; width: 85%; max-width: 800px;">
+An AI-driven platform for lead generation, enrichment, and automated outreach
+</p>
+
+[![GitHub Stars](https://img.shields.io/github/stars/skanderbenali/AI-powered-lead-generation-tool?style=for-the-badge)](https://github.com/skanderbenali/AI-powered-lead-generation-tool/stargazers)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+
+</div>
 
 A full-stack SaaS application for AI-driven lead generation, enrichment, and automated outreach. This project provides a comprehensive solution for businesses to find, score, enrich, and engage with high-quality leads.
 
@@ -49,7 +60,7 @@ This project is structured as a monorepo with several interconnected components:
 - **ML**: XGBoost/RandomForest, OpenAI GPT, scikit-learn
 - **Scraping**: BeautifulSoup, Puppeteer, Selenium
 - **Deployment**: Docker, Docker Compose
-- **Authentication**: JWT, OAuth2
+- **Authentication**: JWT, OAuth2 (Google & GitHub)
 
 ## ⚙️ Getting Started
 
@@ -59,6 +70,8 @@ This project is structured as a monorepo with several interconnected components:
 - Node.js 18+ (for local frontend development)
 - Python 3.11+ (for local backend development)
 - OpenAI API key (for AI features)
+- Google OAuth credentials (for Google authentication)
+- GitHub OAuth credentials (for GitHub authentication)
 
 ### Installation with Docker (Recommended)
 
@@ -71,7 +84,25 @@ This project is structured as a monorepo with several interconnected components:
 2. Create a `.env` file in the root directory (use `.env.example` as a template):
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration
+   # Edit .env with your configuration, including OAuth credentials
+   ```
+   
+   Key environment variables to configure:
+   ```
+   # Core Application
+   SECRET_KEY=your_secret_key
+   DATABASE_URL=postgresql://leadgen:leadgenpass@postgres:5432/leadgen
+   REDIS_URL=redis://redis:6379/0
+   
+   # OAuth Configuration
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   GITHUB_CLIENT_ID=your_github_client_id
+   GITHUB_CLIENT_SECRET=your_github_client_secret
+   FRONTEND_URL=http://localhost:3000
+   
+   # API Configuration
+   OPENAI_API_KEY=your_openai_api_key
    ```
 
 3. Start all services with Docker Compose:
@@ -181,6 +212,11 @@ shared/
 
 - `POST /auth/register` - Register a new user
 - `POST /auth/login` - Login and get access token
+- `GET /auth/google` - Initiate Google OAuth authentication
+- `GET /auth/google/callback` - Handle Google OAuth callback
+- `GET /auth/github` - Initiate GitHub OAuth authentication
+- `GET /auth/github/callback` - Handle GitHub OAuth callback
+- `GET /auth/me` - Get current user profile
 
 ### Leads
 
@@ -244,3 +280,38 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📞 Support
 
 If you have any questions or need help, please open an issue on GitHub or contact the team at support@example.com.
+
+## 🔐 OAuth Configuration
+
+### Setting Up OAuth
+
+1. **Google OAuth**:
+   - Go to the [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project
+   - Navigate to APIs & Services > Credentials
+   - Create OAuth client ID credentials
+   - Set the authorized redirect URI to `http://localhost:8000/auth/google/callback`
+   - Add the Client ID and Client Secret to your `.env` file
+
+2. **GitHub OAuth**:
+   - Go to your [GitHub Settings](https://github.com/settings/developers)
+   - Navigate to Developer Settings > OAuth Apps
+   - Create a new OAuth App
+   - Set the callback URL to `http://localhost:8000/auth/github/callback`
+   - Add the Client ID and Client Secret to your `.env` file
+
+### Using OAuth in the Application
+
+Users can authenticate via:
+
+1. Traditional username/password login
+2. "Login with Google" button
+3. "Login with GitHub" button
+
+OAuth users are automatically registered in the system during their first login. The system will:
+
+- Create a new user account if needed
+- Link the OAuth account to the user's profile
+- Store profile information from the OAuth provider (name, email, avatar)
+
+Users can view and manage their profile information, including data obtained through OAuth providers, on the Profile page.

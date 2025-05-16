@@ -18,6 +18,12 @@ class UserBase(BaseModel):
     is_active: bool = True
     auth_provider: AuthProvider = AuthProvider.LOCAL
     provider_user_id: Optional[str] = None
+    avatar_url: Optional[str] = None
+    # Profile fields
+    bio: Optional[str] = None
+    company: Optional[str] = None
+    job_title: Optional[str] = None
+    location: Optional[str] = None
 
 
 class UserCreate(UserBase):
@@ -60,3 +66,17 @@ class OAuthUserInfo(BaseModel):
     username: Optional[str] = None
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
+
+
+class UserProfileUpdate(BaseModel):
+    """Schema for updating user profile information"""
+    username: Optional[str] = None
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    company: Optional[str] = None
+    job_title: Optional[str] = None
+    location: Optional[str] = None
+    
+    class Config:
+        orm_mode = True
